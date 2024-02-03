@@ -51,7 +51,6 @@ fn decode_password(image_name: String) {
                 bits_of_length.push(bits_to_decode[i]);
             }
             length_to_decode = convert_binary(bits_of_length.clone())[0] * 8;
-            println!("length: {length_to_decode} counter:{counter}");
             bits_to_decode = vec![];
             counter = 0;
         }
@@ -66,11 +65,9 @@ fn decode_password(image_name: String) {
     let mut decoded_bits = convert_binary(bits_to_decode);
     decoded_bits.reverse();
 
-    println!("bits to decode! {:?}", decoded_bits);
-
     let str = String::from_utf8(decoded_bits);
 
-    println!("final password: {:?}", str);
+    println!("Password: {:?}", str);
 }
 
 fn encode_password(image_name: String, password: String) {
@@ -99,29 +96,33 @@ fn encode_password(image_name: String, password: String) {
     let mut out: RgbaImage = ImageBuffer::new(width, height);
 
     let mut counter = 0;
-
-    println!("length of bits to encode: {:?}", bits_to_encode.len());
+    let length_to_encode = bits_to_encode.len();
 
     for (x, y, mut pixel) in img.pixels() {
-        if counter < bits_to_encode.len()
+        if counter < length_to_encode
             && pixel[0].to_be_bytes()[0] >> 0 & 1 != bits_to_encode[counter]
         {
             pixel[0] ^= 0b0000_0001;
         }
-        counter = counter + 1;
-        if counter < bits_to_encode.len()
+        if counter <= length_to_encode {
+            counter = counter + 1;
+        }
+        if counter < length_to_encode
             && pixel[1].to_be_bytes()[0] >> 0 & 1 != bits_to_encode[counter]
         {
             pixel[1] ^= 0b0000_0001;
         }
-        counter = counter + 1;
-        if counter < bits_to_encode.len()
+        if counter <= length_to_encode {
+            counter = counter + 1;
+        }
+        if counter < length_to_encode
             && pixel[2].to_be_bytes()[0] >> 0 & 1 != bits_to_encode[counter]
         {
             pixel[2] ^= 0b0000_0001;
         }
-
-        counter = counter + 1;
+        if counter <= length_to_encode {
+            counter = counter + 1;
+        }
 
         out.put_pixel(x, y, pixel);
     }
